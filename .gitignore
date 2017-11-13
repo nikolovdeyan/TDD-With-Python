@@ -4,3 +4,4 @@ resources/
 "*.pyc"
 **/*.log
 **/*.sqlite3
+virtualenv/
