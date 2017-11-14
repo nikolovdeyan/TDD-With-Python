@@ -1,5 +1,6 @@
 #pylint: disable=missing-docstring, invalid-name, line-too-long
 from django.test import TestCase
+from django.utils.html import escape
 from lists.models import Item, List
 
 class HomePageTest(TestCase):
@@ -7,36 +8,6 @@ class HomePageTest(TestCase):
     def test__home_page__uses_home_template(self):
         response = self.client.get('/')
         self.assertTemplateUsed(response, 'home.html')
-
-
-class ListAndItemModelsTest(TestCase):
-
-    def test__item_model__saves_and_retrieves_items(self):
-        list_ = List()
-        list_.save()
-
-        first_item = Item()
-        first_item.text = 'The first (ever) list item'
-        first_item.list = list_
-        first_item.save()
-
-        second_item = Item()
-        second_item.text = 'Item the second'
-        second_item.list = list_
-        second_item.save()
-
-        saved_list = List.objects.first()
-        self.assertEqual(saved_list, list_)
-
-        saved_items = Item.objects.all()
-        self.assertEqual(saved_items.count(), 2)
-
-        first_saved_item = saved_items[0]
-        second_saved_item = saved_items[1]
-        self.assertEqual(first_saved_item.text, 'The first (ever) list item')
-        self.assertEqual(first_saved_item.list, list_)
-        self.assertEqual(second_saved_item.text, 'Item the second')
-        self.assertEqual(second_saved_item.list, list_)
 
 
 class ListViewTest(TestCase):
@@ -83,6 +54,20 @@ class NewListTest(TestCase):
                                                         'A new list item'})
         new_list = List.objects.first()
         self.assertRedirects(response, '/lists/{}/'.format(new_list.id))
+
+    def test__validation_errors__are_sent_to_home_page_template(self):
+        response = self.client.post('/lists/new', data={'item_text': ''})
+        expected_error = escape('You can\'t have an empty list item')
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'home.html')
+        self.assertContains(response, expected_error)
+
+    def test__list_item__when_invalid__are_not_saved(self):
+        self.client.post('/lists/new', data={'item_text': ''})
+
+        self.assertEqual(List.objects.count(), 0)
+        self.assertEqual(Item.objects.count(), 0)
 
 
 class NewItemTest(TestCase):
