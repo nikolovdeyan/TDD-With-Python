@@ -1,3 +1,4 @@
+#pylint: disable=missing-docstring, invalid-name, line-too-long
 from django.test import TestCase
 from lists.models import Item, List
 
