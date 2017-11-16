@@ -4,37 +4,23 @@ from django.core.exceptions import ValidationError
 from lists.models import Item, List
 
 
-class ListAndItemModelsTest(TestCase):
+class ItemModelTest(TestCase):
 
-    def test__item_model__when_arguments_valid__saves_and_retrieves_items(self):
-        list_ = List()
-        list_.save()
+    def test__item_model__when_item_created__item_has_default_text(self):
+        item = Item()
 
-        first_item = Item()
-        first_item.text = 'The first (ever) list item'
-        first_item.list = list_
-        first_item.save()
+        self.assertEqual(item.text, '')
 
-        second_item = Item()
-        second_item.text = 'Item the second'
-        second_item.list = list_
-        second_item.save()
+    def test__item_model__when_item_created__item_is_related_to_list(self):
+        list_ = List.objects.create()
+        item = Item()
+        item.list = list_
 
-        saved_list = List.objects.first()
-        self.assertEqual(saved_list, list_)
+        item.save()
 
-        saved_items = Item.objects.all()
-        self.assertEqual(saved_items.count(), 2)
+        self.assertIn(item, list_.item_set.all())
 
-        first_saved_item = saved_items[0]
-        second_saved_item = saved_items[1]
-        self.assertEqual(first_saved_item.text, 'The first (ever) list item')
-        self.assertEqual(first_saved_item.list, list_)
-        self.assertEqual(second_saved_item.text, 'Item the second')
-        self.assertEqual(second_saved_item.list, list_)
-
-
-    def test__list_model__when_passed_empty_list_item__throws_ValidationError(self):
+    def test__item_model__when_passed_empty_list_item__throws_ValidationError(self):
         list_ = List.objects.create()
         item = Item(list=list_, text='')
 
@@ -42,6 +28,38 @@ class ListAndItemModelsTest(TestCase):
             item.save()
             item.full_clean()
 
-    def test_get_abosulte_url(self):
+    def test__item_model__duplicate_items_in_same_list__are_invalid(self):
         list_ = List.objects.create()
+        Item.objects.create(list=list_, text='foo')
+
+        with self.assertRaises(ValidationError):
+            item = Item(list=list_, text='foo')
+            item.full_clean()
+
+    def test__item_model__duplicate_items_in_differrent_lists__are_valid(self):
+        list1 = List.objects.create()
+        list2 = List.objects.create()
+        Item.objects.create(list=list1, text='foo')
+        item = Item(list=list2, text='foo')
+        item.full_clean()  # should not raise
+
+    def test__item_model__items_in_list__are_correctly_ordered(self):
+        list1 = List.objects.create()
+        item1 = Item.objects.create(list=list1, text='item1')
+        item2 = Item.objects.create(list=list1, text='item2')
+        item3 = Item.objects.create(list=list1, text='item3')
+
+        self.assertEqual(list(Item.objects.all()), [item1, item2, item3])
+
+    def test__item_model__when_str_called__returns_correct_string_representation(self):
+        item = Item(text='some text')
+
+        self.assertEqual(str(item), 'some text')
+
+
+class ListModelTest(TestCase):
+
+    def test__list_model__when_called__get_abosulte_url_returns_correct_url(self):
+        list_ = List.objects.create()
+
         self.assertEqual(list_.get_absolute_url(), '/lists/{}/'.format(list_.id))
