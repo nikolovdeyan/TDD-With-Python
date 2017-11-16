@@ -1,5 +1,6 @@
 #pylint: disable=missing-docstring, invalid-name, line-too-long
 from django.test import TestCase
+from unittest import skip
 from django.utils.html import escape
 from lists.models import Item, List
 from lists.forms import ItemForm, EMPTY_ITEM_ERROR
@@ -103,6 +104,17 @@ class ListViewTest(TestCase):
 
         self.assertContains(response, escape(EMPTY_ITEM_ERROR))
 
+    @skip
+    def test__list_view__with_duplicate_item__shows_item_validation_error(self):
+        list1 = List.objects.create()
+        item1 = Item.objects.create(list=list1, text='foo')
+        expected_error = escape("You've already got this in you list")
+
+        response = self.client.post('/lists/{}/'.format(list1.id), data={'text': 'foo'})
+
+        self.assertContains(response, expected_error)
+        self.assertTemplateUsed(response, 'list.html')
+        self.assertEqual(Item.objects.all().count(), 1)
 
 
 class NewListTest(TestCase):
