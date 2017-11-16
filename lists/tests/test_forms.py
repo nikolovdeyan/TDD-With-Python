@@ -5,6 +5,13 @@ from lists.models import Item, List
 
 class ItemFormTest(TestCase):
 
+    def test__form_save(self):
+        list_ = List.objects.create()
+        form = ExistingListItemForm(for_list=list_, data={'text': 'hi'})
+        new_item = form.save()
+
+        self.assertEqual(new_item, Item.objects.all()[0])
+
     def test__new_list_form__when_created__renders_item_text_input(self):
         form = ItemForm()
 

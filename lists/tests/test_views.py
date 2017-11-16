@@ -1,9 +1,8 @@
 #pylint: disable=missing-docstring, invalid-name, line-too-long
 from django.test import TestCase
-from unittest import skip
 from django.utils.html import escape
 from lists.models import Item, List
-from lists.forms import ItemForm, EMPTY_ITEM_ERROR
+from lists.forms import DUPLICATE_ITEM_ERROR, EMPTY_ITEM_ERROR, ExistingListItemForm, ItemForm
 
 class HomePageTest(TestCase):
 
@@ -42,7 +41,7 @@ class ListViewTest(TestCase):
         self.assertNotContains(response, 'other list item 1')
         self.assertNotContains(response, 'other list item 2')
 
-    def test__list_view__passes_correct_list_to_template(self):
+    def test__list_view__with_valid_list__passes_correct_list_to_template(self):
         other_list = List.objects.create()
         correct_list = List.objects.create()
 
@@ -72,11 +71,9 @@ class ListViewTest(TestCase):
 
         self.assertRedirects(response, '/lists/{}/'.format(correct_list.id))
 
-    def test__list_view__with_blank_input__uses_list_view_template(self):
+    def test__list_view__with_blank_item__uses_list_view_template(self):
         list_ = List.objects.create()
-        response = self.client.post(
-            '/lists/{}/'.format(list_.id),
-            data={'text': ''})
+        response = self.client.post('/lists/{}/'.format(list_.id), data={'text': ''})
 
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'list.html')
@@ -97,24 +94,31 @@ class ListViewTest(TestCase):
     def test__list_view__with_invalid_input__passes_form_to_template(self):
         response = self.post_invalid_input()
 
-        self.assertIsInstance(response.context['form'], ItemForm)
+        self.assertIsInstance(response.context['form'], ExistingListItemForm)
 
-    def test__list_view__with_invalud_input__shows_error_on_page(self):
+    def test__list_view__with_invalid_input__shows_error_on_page(self):
         response = self.post_invalid_input()
 
         self.assertContains(response, escape(EMPTY_ITEM_ERROR))
 
-    @skip
     def test__list_view__with_duplicate_item__shows_item_validation_error(self):
         list1 = List.objects.create()
         item1 = Item.objects.create(list=list1, text='foo')
-        expected_error = escape("You've already got this in you list")
+        expected_error = escape(DUPLICATE_ITEM_ERROR)
 
         response = self.client.post('/lists/{}/'.format(list1.id), data={'text': 'foo'})
 
         self.assertContains(response, expected_error)
         self.assertTemplateUsed(response, 'list.html')
         self.assertEqual(Item.objects.all().count(), 1)
+
+    def test__list_view__when_rendered__displays_item_form(self):
+        list_ = List.objects.create()
+
+        response = self.client.get('/lists/{}/'.format(list_.id))
+
+        self.assertIsInstance(response.context['form'], ExistingListItemForm)
+        self.assertContains(response, 'name="text"')
 
 
 class NewListTest(TestCase):
@@ -152,4 +156,3 @@ class NewListTest(TestCase):
 
         self.assertEqual(List.objects.count(), 0)
         self.assertEqual(Item.objects.count(), 0)
-
