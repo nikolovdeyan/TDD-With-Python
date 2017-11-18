@@ -20,7 +20,7 @@ class ItemModelTest(TestCase):
 
         self.assertIn(item, list_.item_set.all())
 
-    def test__item_model__when_passed_empty_list_item__throws_ValidationError(self):
+    def test__item_model__when_passed_empty_list_item__raises_ValidationError(self):
         list_ = List.objects.create()
         item = Item(list=list_, text='')
 
@@ -28,7 +28,7 @@ class ItemModelTest(TestCase):
             item.save()
             item.full_clean()
 
-    def test__item_model__duplicate_items_in_same_list__are_invalid(self):
+    def test__item_model__when_duplicate_item_same_list__raises_ValidationError(self):
         list_ = List.objects.create()
         Item.objects.create(list=list_, text='foo')
 
@@ -36,14 +36,14 @@ class ItemModelTest(TestCase):
             item = Item(list=list_, text='foo')
             item.full_clean()
 
-    def test__item_model__duplicate_items_in_differrent_lists__are_valid(self):
+    def test__item_model__when_duplicate_item_differrent_list__items_are_valid(self):
         list1 = List.objects.create()
         list2 = List.objects.create()
         Item.objects.create(list=list1, text='foo')
         item = Item(list=list2, text='foo')
         item.full_clean()  # should not raise
 
-    def test__item_model__items_in_list__are_correctly_ordered(self):
+    def test__item_model__when_items_in_list__items_are_correctly_ordered(self):
         list1 = List.objects.create()
         item1 = Item.objects.create(list=list1, text='item1')
         item2 = Item.objects.create(list=list1, text='item2')
@@ -51,7 +51,7 @@ class ItemModelTest(TestCase):
 
         self.assertEqual(list(Item.objects.all()), [item1, item2, item3])
 
-    def test__item_model__when_str_called__returns_correct_string_representation(self):
+    def test__item_model__when_item_string_called__correct_string_returned(self):
         item = Item(text='some text')
 
         self.assertEqual(str(item), 'some text')
