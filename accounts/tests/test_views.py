@@ -60,9 +60,35 @@ class SendLoginEmailViewTest(TestCase):
         self.assertIn(expected_url, body)
 
 
+@patch('accounts.views.auth')
 class LoginViewTest(TestCase):
 
-    def test__login_view__when_called__redirects_to_home_page(self):
+    def test__login_view__when_called__redirects_to_home_page(self, mock_auth):
         response = self.client.post('/accounts/login?token=abcd123')
 
         self.assertRedirects(response, '/')
+
+
+    def test__login_view__with_get_request__calls_authenticate_with_request_uid(self, mock_auth):
+        response = self.client.get('/accounts/login?token=abcd123')
+
+        self.assertEqual(
+            mock_auth.authenticate.call_args,
+            call(uid='abcd123')
+        )
+
+    def test__login_view__when_user_exists__calls_auth_login_with_user(self, mock_auth):
+        response = self.client.get('/accounts/login?token=abcd123')
+
+        self.assertEqual(
+            mock_auth.login.call_args,
+            call(response.wsgi_request, mock_auth.authenticate.return_value)
+        )
+
+
+    def test__login_view__when_user_not_authenticated__auth_login_not_called(self, mock_auth):
+        mock_auth.authenticate.return_value = None
+
+        self.client.get('/accounts/login?token=abcd123')
+
+        self.assertEqual(mock_auth.login.called, False)

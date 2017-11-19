@@ -8,7 +8,7 @@ User = get_user_model()
 
 class AuthenticateTest(TestCase):
 
-    def test__authenticate__when_no_such_token__returns_None(self):
+    def test__authenticate__when_token_does_not_exist__returns_None(self):
         result = PasswordlessAuthenticationBackend().authenticate(
             'no-such-token'
         )

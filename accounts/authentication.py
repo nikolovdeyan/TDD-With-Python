@@ -1,3 +1,4 @@
+#pylint: disable=no-member, missing-docstring
 from accounts.models import User, Token
 
 class PasswordlessAuthenticationBackend(object):
