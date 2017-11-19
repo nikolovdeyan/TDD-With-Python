@@ -28,6 +28,11 @@ DEBUG = True
 # Needed when DEBUG=False
 ALLOWED_HOSTS = ['127.0.0.1']
 
+EMAIL_HOST = ''
+EMAIL_HOST_USER = ''
+EMAIL_HOST_PASSWORD = ''
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
 
 # Application definition
 

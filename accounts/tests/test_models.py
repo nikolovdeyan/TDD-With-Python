@@ -1,8 +1,8 @@
+#pylint: disable=missing-docstring, invalid-name, line-too-long, attribute-defined-outside-init
 from accounts.models import Token
 from django.test import TestCase
-from django.contrib.auth import get_user_model
-
-User = get_user_model()
+from django.contrib import auth
+User = auth.get_user_model()
 
 
 class UserModelTest(TestCase):
@@ -11,10 +11,18 @@ class UserModelTest(TestCase):
         user = User(email='foo@bar.com')
         user.full_clean()  # should not raise
 
+
     def test__user_model__when_created__has_email_as_primary_key(self):
         user = User(email='foo@bar.com')
 
         self.assertEqual(user.pk, 'foo@bar.com')
+
+
+    def test__user_model__when_authenticating__can_login(self):
+        user = User.objects.create(email='edith@example.com')
+        user.backend = ''
+        request = self.client.request().wsgi_request
+        auth.login(request, user) # should not raise
 
 
 class TokenModelTest(TestCase):
