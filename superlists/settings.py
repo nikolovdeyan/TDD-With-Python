@@ -28,12 +28,6 @@ DEBUG = True
 # Needed when DEBUG=False
 ALLOWED_HOSTS = ['127.0.0.1']
 
-#  EMAIL_HOST = 'smtp.gmail.com'
-#  EMAIL_HOST_USER = 'deploy.applications.1m49vh2@gmail.com'
-#  EMAIL_HOST_PASSWORD = 'Q252VKQkuiZ8ZDJnI5fR'
-#  EMAIL_PORT = 587
-#  EMAIL_USE_TLS = True
-
 # Application definition
 
 INSTALLED_APPS = [
