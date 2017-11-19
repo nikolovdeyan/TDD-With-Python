@@ -1,9 +1,10 @@
+#pylint: disable=missing-docstring, invalid-name, line-too-long, unused-import
+import random
 from fabric.api import local, run, env, cd, sudo
 from fabric.contrib.files import append, exists, sed
-import random
 
-env.key_filename=['c:/Users/Thoth/.ssh/id_rsa']
-env.hosts=['Thoth@192.168.0.66:10022']
+env.key_filename = ['c:/Users/Thoth/.ssh/id_rsa']
+env.hosts = ['Thoth@192.168.0.66:10022']
 
 REPO_URL = 'https://github.com/nikolovdeyan/py_TDD-With-Python.git'
 SITE_NAME = 'staging_tdd-with-django'
