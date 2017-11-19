@@ -6,7 +6,7 @@ env.key_filename=['c:/Users/Thoth/.ssh/id_rsa']
 env.hosts=['Thoth@192.168.0.66:10022']
 
 REPO_URL = 'https://github.com/nikolovdeyan/py_TDD-With-Python.git'
-SITE_NAME = 'prod_tdd-with-django'
+SITE_NAME = 'staging_tdd-with-django'
 APP_DIR = '/home/Thoth/sites/{}/source/'.format(SITE_NAME)
 
 def deploy():
