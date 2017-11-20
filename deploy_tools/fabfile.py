@@ -15,11 +15,13 @@ REPO_URL = 'https://github.com/nikolovdeyan/py_TDD-With-Python.git'
 
 def prod():
     env.site_name = 'prod_tdd-with-django'
+    print('Production configuration applied.')
 
 def staging():
     env.site_name = 'staging_tdd-with-django'
+    print('Staging configuration applied.')
 
-def get_status():
+def status():
     site_name = env.site_name
     os_info = run('lsb_release -d', quiet=True)
     nginx_status = run('cat /etc/nginx/sites-available/{}'.format(site_name), quiet=True)
@@ -34,13 +36,18 @@ def get_status():
 def deploy():
     site_dir = '/home/{}/sites/{}'.format(env.user, env.site_name)
     source_dir = site_dir + '/source'
+    allowed_hosts = env.host
 
     _create_or_update_dir_structure(site_dir)
     _get_latest_source(source_dir)
-    _update_settings(source_dir, env.host)
+    _update_settings(source_dir, allowed_hosts)
     _update_virtualenv(source_dir)
     _update_static_files(source_dir)
     _update_database(source_dir)
+
+def reset_services():
+    sudo('systemctl daemon-reload')
+    sudo('systemctl reload nginx')
 
 def _create_or_update_dir_structure(site_dir):
     for subdir in ('database', 'static', 'virtualenv', 'source'):
@@ -54,11 +61,11 @@ def _get_latest_source(source_dir):
     current_commit = local("git log -n 1 --format=%H", capture=True)
     run('cd {} && git reset --hard {}'.format(source_dir, current_commit))
 
-def _update_settings(source_dir, site_name):
+def _update_settings(source_dir, allowed_hosts):
     settings_path = source_dir + '/superlists/settings.py'
     sed(settings_path, "DEBUG = True", "DEBUG = False")
     sed(settings_path, 'ALLOWED_HOSTS = .+$',
-        'ALLOWED_HOSTS = ["{}"]'.format(site_name))
+        'ALLOWED_HOSTS = ["{}"]'.format(allowed_hosts))
     secret_key_file = source_dir + '/superlists/secret_key.py'
     if not exists(secret_key_file):
         chars = 'abcdefgijklmnopqrstuvwxyz0123456789!@#$%^&*(-_=+)'
@@ -73,7 +80,7 @@ def _update_virtualenv(source_dir):
     run('{}/bin/pip install -r {}/requirements.txt'.format(virtualenv_dir, source_dir))
 
 def _update_static_files(source_dir):
-    run('cd {} && ../virtualenv/bin/python manage.py collectstatic --noinput'.format(source_dir))
+    run('cd {} && ../virtualenv/bin/python manage.py collectstatic --noinput'.format(source_dir), quiet=True)
 
 def _update_database(source_dir):
     run('cd {} && ../virtualenv/bin/python manage.py migrate --noinput'.format(source_dir))

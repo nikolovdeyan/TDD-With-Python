@@ -1,6 +1,5 @@
 #pylint: disable=missing-docstring, invalid-name, line-too-long, no-member
 import re
-from django.core import mail
 from selenium.webdriver.common.keys import Keys
 
 from .base import FunctionalTest

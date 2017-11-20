@@ -4,6 +4,7 @@ import os
 import poplib
 import re
 from django.contrib.staticfiles.testing import StaticLiveServerTestCase
+from django.core import mail
 from selenium import webdriver
 from selenium.common.exceptions import WebDriverException
 
