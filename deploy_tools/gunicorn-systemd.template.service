@@ -3,10 +3,14 @@ Description=Gunicorn server for SITENAME
 
 [Service]
 Restart=on-failure
-User=Thoth
+User=USERNAME
+Environment="EMAIL_SECRET"
+
 WorkingDirectory=/home/Thoth/sites/SITENAME/source
 ExecStart=/home/Thoth/sites/SITENAME/virtualenv/bin/gunicorn \
     --bind unix:/tmp/SITENAME.socket \
+    --access-logfile ../access.log \
+    --error-logfile ../error.log \
     superlists.wsgi:application
 
 [Install]

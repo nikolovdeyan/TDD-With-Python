@@ -3,24 +3,46 @@ import random
 from fabric.api import local, run, env, cd, sudo
 from fabric.contrib.files import append, exists, sed
 
-env.key_filename = ['c:/Users/Thoth/.ssh/id_rsa']
-env.hosts = ['Thoth@192.168.0.66:10022']
+env.hosts = ['']
+env.user = ''
+env.key_filename = ['']
+env.password = ''
+env.connection_attempts = 5
+env.colorize_errors = True
+env.warn_only = True
 
 REPO_URL = 'https://github.com/nikolovdeyan/py_TDD-With-Python.git'
-SITE_NAME = 'staging_tdd-with-django'
-APP_DIR = '/home/Thoth/sites/{}/source/'.format(SITE_NAME)
+
+def prod():
+    env.site_name = 'prod_tdd-with-django'
+
+def staging():
+    env.site_name = 'staging_tdd-with-django'
+
+def get_status():
+    site_name = env.site_name
+    os_info = run('lsb_release -d', quiet=True)
+    nginx_status = run('cat /etc/nginx/sites-available/{}'.format(site_name), quiet=True)
+    gunicorn_status = run('cat /etc/systemd/system/gunicorn-{}.service'.format(site_name), quiet=True)
+
+    print('\n\n\nSTATUS OF: {}@{}'.format(site_name, env.host))
+    print('_' * 79, '\n')
+    print('System Information:\n{}\n\n\n'.format(os_info))
+    print(nginx_status, '\n\n')
+    print(gunicorn_status, '\n\n')
 
 def deploy():
-    site_dir = '/home/{}/sites/{}'.format(env.user, SITE_NAME)
+    site_dir = '/home/{}/sites/{}'.format(env.user, env.site_name)
     source_dir = site_dir + '/source'
-    _create_directory_structure_if_necessary(site_dir)
+
+    _create_or_update_dir_structure(site_dir)
     _get_latest_source(source_dir)
     _update_settings(source_dir, env.host)
     _update_virtualenv(source_dir)
     _update_static_files(source_dir)
     _update_database(source_dir)
 
-def _create_directory_structure_if_necessary(site_dir):
+def _create_or_update_dir_structure(site_dir):
     for subdir in ('database', 'static', 'virtualenv', 'source'):
         run('mkdir -p {}/{}'.format(site_dir, subdir))
 

@@ -1,2 +1,2 @@
-./lists/static/jQuery/* linguist-documentation
-./lists/static/bootstrap/* linguist-documentation
+./**/jQuery/ linguist-documentation
+./**/static/bootstrap/ linguist-documentation
