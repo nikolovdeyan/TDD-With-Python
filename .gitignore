@@ -5,3 +5,4 @@ resources/
 **/*.log
 **/*.sqlite3
 virtualenv/
+fab_env_conf.py

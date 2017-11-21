@@ -63,6 +63,7 @@ class FunctionalTest(StaticLiveServerTestCase):
         self.assertNotIn(email, navbar.text)
 
     def wait_for_email(self, test_email, subject):
+        print(self.staging_server)
         if not self.staging_server:
             email = mail.outbox[0]
             self.assertIn(test_email, email.to)
@@ -74,7 +75,7 @@ class FunctionalTest(StaticLiveServerTestCase):
         inbox = poplib.POP3_SSL('pop.gmail.com')
         try:
             inbox.user(test_email)
-            inbox.pass_(os.environ['GMAIL_PASSWORD'])
+            inbox.pass_('42827d51042ae59b02113f9a9732fb33')
             while time.time() - start < 60:
                 # get 10 newest messages
                 count, _ = inbox.stat()

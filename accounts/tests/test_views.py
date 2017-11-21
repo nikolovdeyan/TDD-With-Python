@@ -39,6 +39,7 @@ class SendLoginEmailViewTest(TestCase):
         )
         self.assertEqual(message.tags, "success")
 
+
     def test__send_email_view__when_successful__creates_token_associated_with_email(self):
         self.client.post('/accounts/send_login_email', data={
             'email': 'edith@example.com'
@@ -46,6 +47,7 @@ class SendLoginEmailViewTest(TestCase):
         token = Token.objects.first()
 
         self.assertEqual(token.email, 'edith@example.com')
+
 
     @patch('accounts.views.send_mail')
     def test__send_email_view__when_successful__sends_link_to_login_using_token_uid(self, mock_send_mail):
@@ -76,6 +78,7 @@ class LoginViewTest(TestCase):
             mock_auth.authenticate.call_args,
             call(uid='abcd123')
         )
+
 
     def test__login_view__when_user_exists__calls_auth_login_with_user(self, mock_auth):
         response = self.client.get('/accounts/login?token=abcd123')
