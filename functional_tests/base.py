@@ -3,6 +3,9 @@ import time
 import os
 import poplib
 import re
+from .server_tools import reset_database
+from .server_tools import reset_database
+from .server_tools import reset_database
 from django.contrib.staticfiles.testing import StaticLiveServerTestCase
 from django.core import mail
 from selenium import webdriver
@@ -18,6 +21,7 @@ class FunctionalTest(StaticLiveServerTestCase):
         self.staging_server = os.environ.get('STAGING_SERVER')
         if self.staging_server:
             self.live_server_url = 'http://' + self.staging_server
+            reset_database(self.staging_server)
 
 
     def tearDown(self):
